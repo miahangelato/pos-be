@@ -56,8 +56,10 @@ Rails.application.configure do
   # Set this to true and configure the email server for immediate delivery to raise delivery errors.
   # config.action_mailer.raise_delivery_errors = false
 
-  # Set host to be used by links generated in mailer templates.
-  config.action_mailer.default_url_options = { host: "example.com" }
+  # Set host to be used by links generated in mailer templates and Active Storage URLs.
+  backend_host = ENV['BACKEND_URL']&.gsub(/https?:\/\//, '') || "pos-be-0zb1.onrender.com"
+  config.action_mailer.default_url_options = { host: backend_host }
+  Rails.application.routes.default_url_options = { host: backend_host, protocol: 'https' }
 
   # Specify outgoing SMTP server. Remember to add smtp/* credentials via bin/rails credentials:edit.
   # config.action_mailer.smtp_settings = {

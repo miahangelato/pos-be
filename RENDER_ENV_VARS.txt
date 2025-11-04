@@ -4,11 +4,12 @@ Copy these into your Render backend service Environment tab:
 
 RAILS_ENV=production
 SECRET_KEY_BASE=cc0e613df9c70c5b81c2651cc9ebbe8f1a624c2171559e96ee1da99d52eb8fef80fc4141c039322c03c969b68e023cc2d380a3541dd49b7df48dfef318732b88
-BACKEND_URL=https://your-backend-app.onrender.com
-FRONTEND_URL=https://your-frontend-app.onrender.com
-ALLOWED_ORIGINS=https://your-frontend-app.onrender.com
+RAILS_MASTER_KEY=c13a7fdc7eb1aa0c0c427baa03dc05f6
+BACKEND_URL=https://pos-be-0zb1.onrender.com
+FRONTEND_URL=https://pos-fe-jfuq.vercel.app
+ALLOWED_ORIGINS=https://pos-fe-jfuq.vercel.app
 
 # DATABASE_URL will be automatically set by Render when you connect PostgreSQL service
 
-# Build Command: bundle install && rails db:migrate && rails db:seed
-# Start Command: rails server -e production -p $PORT
+# Build Command: bundle install
+# Start Command: rails db:migrate && rails db:seed && rails server -e production -p $PORT
