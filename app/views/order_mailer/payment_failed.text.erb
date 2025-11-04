@@ -1,0 +1,31 @@
+Payment Failed
+
+Hello <%= @order.customer.full_name %>,
+
+Unfortunately, your payment for order #<%= @order.reference_number %> could not be processed or was rejected.
+
+Please review the payment details and try again, or contact support if you need assistance.
+
+ORDER DETAILS:
+Order Reference: <%= @order.reference_number %>
+Amount Required: ₱<%= number_with_precision(@order.grand_total, precision: 2) %>
+Order Status: <%= @order.status %>
+Payment Status: FAILED
+
+ACTION REQUIRED:
+To proceed with your order, please:
+1. Check your GCash account to ensure sufficient balance
+2. Verify your account is active and not restricted
+3. Try the payment again from your GCash app
+4. If the issue persists, contact our support team
+
+Note: If you don't complete the payment within 24 hours, your order may be automatically cancelled.
+
+NEED HELP?
+Email: support@posystem.com
+Contact Number: +63 (2) 1234-5678
+
+We're here to help! Please reach out if you have any questions.
+
+---
+This is an automated email. Please do not reply directly. Contact support if you have questions.

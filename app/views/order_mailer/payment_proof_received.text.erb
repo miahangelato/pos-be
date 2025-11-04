@@ -1,0 +1,40 @@
+PAYMENT PROOF RECEIVED
+========================
+
+Dear <%= @merchant.name %>,
+
+A customer has submitted payment proof for their GCash order. Please review and verify the payment to complete the order.
+
+ORDER INFORMATION:
+==================
+Order Number: <%= @order.reference_number %>
+Status: <%= @order.status %>
+Payment Method: <%= @order.payment_method %>
+Order Total: ₱<%= number_with_precision(@order.grand_total, precision: 2) %>
+Order Date: <%= @order.created_at.strftime('%B %d, %Y at %I:%M %p') %>
+
+CUSTOMER INFORMATION:
+=====================
+Customer Name: <%= @customer.full_name %>
+Email: <%= @customer.email %>
+Mobile Number: <%= @customer.mobile_number %>
+
+PAYMENT PROOF DETAILS:
+======================
+Submission Time: <%= @order.payment_proof.created_at.strftime('%B %d, %Y at %I:%M %p') %>
+<% if @order.payment_proof.remarks.present? %>
+Customer Remarks: <%= @order.payment_proof.remarks %>
+<% end %>
+Proof Status: <%= @order.payment_proof.status.upcase %>
+
+ACTION REQUIRED:
+================
+Please log into your merchant dashboard to review the payment proof and approve or reject the payment.
+
+Dashboard URL: <%= ENV['FRONTEND_URL'] || 'http://localhost:5173' %>/dashboard
+
+---
+This is an automated notification email.
+Please do not reply to this message.
+
+© <%= Time.now.year %> POS System. All rights reserved.

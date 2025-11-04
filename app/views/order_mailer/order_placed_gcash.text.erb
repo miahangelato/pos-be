@@ -1,0 +1,54 @@
+GCash Payment Required
+
+Hello <%= @order.customer.full_name %>,
+
+Thank you for placing your order! We've received your order and are waiting for your GCash payment.
+
+PAYMENT AMOUNT: ₱<%= number_with_precision(@order.grand_total, precision: 2) %>
+ORDER REFERENCE: <%= @order.reference_number %>
+
+GCASH TRANSFER INSTRUCTIONS:
+1. Open your GCash app
+2. Go to "Send Money" and select the merchant account
+3. Enter the amount: ₱<%= number_with_precision(@order.grand_total, precision: 2) %>
+4. Complete the transfer (save your reference number!)
+5. Take a screenshot showing the transaction confirmation
+
+ORDER DETAILS:
+<% @order.order_items.each do |item| %>
+  <%= item.product.name %> (x<%= item.quantity %>) - ₱<%= number_with_precision(item.line_total, precision: 2) %>
+<% end %>
+
+Subtotal: ₱<%= number_with_precision(@order.subtotal, precision: 2) %>
+<% if @order.shipping_fee.to_f > 0 %>
+Shipping Fee: ₱<%= number_with_precision(@order.shipping_fee, precision: 2) %>
+<% end %>
+<% if @order.convenience_fee.to_f > 0 %>
+Convenience Fee: ₱<%= number_with_precision(@order.convenience_fee, precision: 2) %>
+<% end %>
+
+TOTAL TO PAY: ₱<%= number_with_precision(@order.grand_total, precision: 2) %>
+
+UPLOAD PAYMENT PROOF:
+Click the link below to upload your GCash transaction screenshot:
+<%= new_payment_proof_url(order_id: @order.id) %>
+
+WHAT HAPPENS NEXT:
+1. Upload Screenshot: Submit your GCash transaction screenshot
+2. Verification: Our team will verify your payment (usually within 24 hours)
+3. Confirmation: You'll receive an email once payment is verified
+4. Shipment: Your order will be processed for shipment immediately after verification
+
+IMPORTANT NOTES:
+- Ensure your GCash transaction reference number is clearly visible in the screenshot
+- Include the transaction date and amount in your screenshot
+- Payment proof must be submitted within 24 hours to avoid order cancellation
+
+NEED HELP?
+Email: support@posystem.com
+Contact Number: +63 (2) 1234-5678
+
+Thank you for your business! We appreciate your order.
+
+---
+This is an automated email. Please do not reply directly. Contact support if you have questions.

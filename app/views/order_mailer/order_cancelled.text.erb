@@ -1,0 +1,22 @@
+ORDER CANCELLED
+===============
+
+Your order has been cancelled
+
+Order Reference: <%= @order.reference_number %>
+Status: CANCELLED
+
+ORDER CANCELLATION
+------------------
+Your order has been cancelled as requested.
+
+If you have any questions or concerns about this cancellation, please contact us.
+
+ORDER SUMMARY
+-------------
+Total Amount: ₱<%= sprintf('%.2f', @order.grand_total) %>
+Payment Method: <%= @order.payment_method %>
+
+---
+We hope to serve you again soon!
+© <%= Time.now.year %> POS System. All rights reserved.

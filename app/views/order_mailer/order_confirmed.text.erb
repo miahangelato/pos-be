@@ -1,0 +1,27 @@
+ORDER CONFIRMED
+===============
+
+Your order has been confirmed and is being prepared!
+
+Order Reference: <%= @order.reference_number %>
+Status: <%= @order.status %>
+
+WHAT'S NEXT?
+------------
+Your order has been confirmed by the merchant and is now being prepared for <%= @order.order_type == 'ONLINE' ? 'delivery' : 'pickup' %>.
+
+<% if @order.order_type == 'ONLINE' %>
+We'll notify you once your order is out for delivery.
+<% else %>
+You can pick up your order at the merchant's location.
+<% end %>
+
+ORDER SUMMARY
+-------------
+Total Amount: ₱<%= sprintf('%.2f', @order.grand_total) %>
+Payment Method: <%= @order.payment_method %>
+Payment Status: <%= @order.payment_status %>
+
+---
+Thank you for shopping with us!
+© <%= Time.now.year %> POS System. All rights reserved.

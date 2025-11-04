@@ -1,0 +1,26 @@
+ORDER COMPLETED
+===============
+
+Your order has been successfully completed!
+
+Order Reference: <%= @order.reference_number %>
+Status: <%= @order.status %>
+
+THANK YOU!
+----------
+Your order has been completed and <%= @order.order_type == 'ONLINE' ? 'delivered' : 'picked up' %> successfully.
+
+We hope you enjoy your purchase! If you have any issues or concerns, please don't hesitate to contact us.
+
+ORDER SUMMARY
+-------------
+Total Amount: ₱<%= sprintf('%.2f', @order.grand_total) %>
+Payment Method: <%= @order.payment_method %>
+Payment Status: <%= @order.payment_status %>
+
+---
+We'd love to hear from you!
+Please rate your experience and help us improve our service.
+
+Thank you for choosing us!
+© <%= Time.now.year %> POS System. All rights reserved.

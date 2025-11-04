@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Payment Proof Received - <%= @order.reference_number %></title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      line-height: 1.6;
+      color: #333;
+      max-width: 600px;
+      margin: 0 auto;
+      background-color: #f4f4f4;
+    }
+    .container {
+      background-color: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.1);
+      margin: 20px;
+    }
+    .header {
+      text-align: center;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 30px;
+      border-radius: 10px 10px 0 0;
+      margin: -30px -30px 30px -30px;
+    }
+    .header h1 {
+      margin: 0 0 10px 0;
+      font-size: 28px;
+    }
+    .header p {
+      margin: 0;
+      opacity: 0.9;
+    }
+    .content {
+      padding: 0 10px;
+    }
+    .section {
+      background-color: #f9f9f9;
+      padding: 20px;
+      margin-bottom: 20px;
+      border-radius: 8px;
+      border: 1px solid #e5e7eb;
+    }
+    .section-title {
+      font-size: 18px;
+      font-weight: bold;
+      color: #1f2937;
+      margin-bottom: 15px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #2563eb;
+    }
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid #f3f4f6;
+    }
+    .info-label {
+      font-weight: 600;
+      color: #6b7280;
+    }
+    .info-value {
+      color: #1f2937;
+      text-align: right;
+    }
+    .status-badge {
+      display: inline-block;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: 600;
+      background-color: #fef3c7;
+      color: #92400e;
+    }
+    .alert-box {
+      background-color: #fef2f2;
+      border-left-4px solid #ef4444;
+      padding: 15px;
+      border-radius: 5px;
+      margin-bottom: 20px;
+    }
+    .alert-title {
+      font-weight: bold;
+      color: #dc2626;
+      margin-bottom: 5px;
+    }
+    .alert-text {
+      color: #991b1b;
+      font-size: 14px;
+    }
+    .action-buttons {
+      text-align: center;
+      margin: 30px 0;
+    }
+    .btn {
+      display: inline-block;
+      padding: 12px 24px;
+      text-decoration: none;
+      border-radius: 5px;
+      font-weight: 600;
+      margin: 0 10px;
+      font-size: 16px;
+    }
+    .btn-primary {
+      background-color: #2563eb;
+      color: white;
+    }
+    .footer {
+      text-align: center;
+      padding: 20px;
+      color: #6b7280;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>📸 Payment Proof Received</h1>
+      <p>Action required for order verification</p>
+    </div>
+
+    <div class="content">
+      <!-- Alert Box -->
+      <div class="alert-box">
+        <div class="alert-title">⚠️ Payment Verification Required</div>
+        <div class="alert-text">
+          A customer has submitted payment proof for their GCash order. Please review and verify the payment to complete the order.
+        </div>
+      </div>
+
+      <!-- Order Reference -->
+      <div class="section">
+        <div class="section-title">Order Information</div>
+        <div class="info-row">
+          <span class="info-label">Order Number:</span>
+          <span class="info-value" style="font-size: 18px; font-weight: bold; color: #2563eb;"><%= @order.reference_number %></span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Status:</span>
+          <span class="info-value"><span class="status-badge"><%= @order.status %></span></span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Payment Method:</span>
+          <span class="info-value"><%= @order.payment_method %></span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Order Total:</span>
+          <span class="info-value" style="font-weight: bold; color: #059669;">₱<%= number_with_precision(@order.grand_total, precision: 2) %></span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Order Date:</span>
+          <span class="info-value"><%= @order.created_at.strftime('%B %d, %Y at %I:%M %p') %></span>
+        </div>
+      </div>
+
+      <!-- Customer Information -->
+      <div class="section">
+        <div class="section-title">Customer Information</div>
+        <div class="info-row">
+          <span class="info-label">Customer Name:</span>
+          <span class="info-value"><%= @customer.full_name %></span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Email:</span>
+          <span class="info-value"><%= @customer.email %></span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Mobile Number:</span>
+          <span class="info-value"><%= @customer.mobile_number %></span>
+        </div>
+      </div>
+
+      <!-- Payment Proof Information -->
+      <div class="section">
+        <div class="section-title">Payment Proof Details</div>
+        <div class="info-row">
+          <span class="info-label">Submission Time:</span>
+          <span class="info-value"><%= @order.payment_proof.created_at.strftime('%B %d, %Y at %I:%M %p') %></span>
+        </div>
+        <% if @order.payment_proof.remarks.present? %>
+        <div class="info-row">
+          <span class="info-label">Customer Remarks:</span>
+          <span class="info-value"><%= @order.payment_proof.remarks %></span>
+        </div>
+        <% end %>
+        <div class="info-row">
+          <span class="info-label">Proof Status:</span>
+          <span class="info-value">
+            <span class="status-badge" style="background-color: #fbbf24; color: #92400e;">
+              <%= @order.payment_proof.status.upcase %>
+            </span>
+          </span>
+        </div>
+      </div>
+
+      <!-- Action Required -->
+      <div class="action-buttons">
+        <p style="margin-bottom: 20px; color: #6b7280;">
+          Please log into your merchant dashboard to review the payment proof and approve or reject the payment.
+        </p>
+        <a href="<%= ENV['FRONTEND_URL'] || 'http://localhost:5173' %>/dashboard" class="btn btn-primary">
+          📋 Review Payment Proof
+        </a>
+      </div>
+    </div>
+
+    <div class="footer">
+      <p>This is an automated notification email.</p>
+      <p>Please do not reply to this message.</p>
+      <p>&copy; <%= Time.now.year %> POS System. All rights reserved.</p>
+    </div>
+  </div>
+</body>
+</html>

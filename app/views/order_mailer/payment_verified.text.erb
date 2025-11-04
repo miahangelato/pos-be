@@ -1,0 +1,34 @@
+Payment Verified!
+
+Hello <%= @order.customer.full_name %>,
+
+Great news! Your GCash payment for order #<%= @order.reference_number %> has been verified and confirmed.
+
+Your order is now being prepared for shipment. You'll receive another email when your order is out for delivery.
+
+ORDER SUMMARY:
+<% @order.order_items.each do |item| %>
+  <%= item.product.name %> (x<%= item.quantity %>) - ₱<%= number_with_precision(item.line_total, precision: 2) %>
+<% end %>
+
+Subtotal: ₱<%= number_with_precision(@order.subtotal, precision: 2) %>
+<% if @order.shipping_fee.to_f > 0 %>
+Shipping Fee: ₱<%= number_with_precision(@order.shipping_fee, precision: 2) %>
+<% end %>
+
+TOTAL PAID: ₱<%= number_with_precision(@order.grand_total, precision: 2) %>
+
+WHAT'S NEXT?
+1. Preparation: Your order is being prepared for shipment
+2. Quality Check: Items are being inspected and packaged
+3. Shipment: Your order will be handed to our delivery partner
+4. Tracking: You'll receive an email with tracking information
+5. Delivery: Your order will arrive at your specified address
+
+NEED HELP?
+Email: support@posystem.com
+
+Thank you for your business! We appreciate your order.
+
+---
+This is an automated email. Please do not reply directly. Contact support if you have questions.

@@ -1,0 +1,47 @@
+Your Order is Out for Delivery!
+
+Hello <%= @order.customer.full_name %>,
+
+Great news! Your order #<%= @order.reference_number %> is now out for delivery.
+
+Our delivery partner is on their way to your address. Your order is expected to arrive soon!
+
+DELIVERY STATUS: In Transit
+Expected Delivery: Within 24 hours
+Please ensure someone is available to receive the package.
+
+DELIVERY ADDRESS:
+<%= @order.delivery_address&.full_address || 'N/A' %>
+
+ORDER SUMMARY:
+<% @order.order_items.each do |item| %>
+  <%= item.product.name %> (x<%= item.quantity %>) - ₱<%= number_with_precision(item.line_total, precision: 2) %>
+<% end %>
+
+Subtotal: ₱<%= number_with_precision(@order.subtotal, precision: 2) %>
+<% if @order.shipping_fee.to_f > 0 %>
+Shipping Fee: ₱<%= number_with_precision(@order.shipping_fee, precision: 2) %>
+<% end %>
+<% if @order.convenience_fee.to_f > 0 %>
+Convenience Fee: ₱<%= number_with_precision(@order.convenience_fee, precision: 2) %>
+<% end %>
+<% if @order.discount_amount.to_f > 0 %>
+Discount: -₱<%= number_with_precision(@order.discount_amount, precision: 2) %>
+<% end %>
+
+GRAND TOTAL: ₱<%= number_with_precision(@order.grand_total, precision: 2) %>
+
+IMPORTANT INSTRUCTIONS:
+- Please be available to receive the package during delivery hours
+- Have a valid ID ready for verification if required
+- Contact the delivery partner immediately if you're not available
+- Inspect the package for any visible damage before signing
+
+NEED HELP?
+If you have any questions about your delivery or order, please contact us.
+Email: support@posystem.com
+
+Thank you for your business! We appreciate your order.
+
+---
+This is an automated email. Please do not reply directly. Contact support if you have questions.

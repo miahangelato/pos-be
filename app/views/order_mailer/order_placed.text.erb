@@ -1,0 +1,66 @@
+ORDER PLACED SUCCESSFULLY
+========================
+
+Thank you for your order!
+
+Order Reference Number: <%= @order.reference_number %>
+Status: <%= @order.status %>
+
+CUSTOMER INFORMATION
+--------------------
+Full Name: <%= @customer.full_name %>
+Email Address: <%= @customer.email %>
+Mobile Number: <%= @customer.mobile_number %>
+
+<% if @delivery_address && @order.order_type == 'ONLINE' %>
+DELIVERY ADDRESS
+----------------
+<% if @delivery_address.room_unit.present? %>
+<%= @delivery_address.room_unit %>, 
+<% end %>
+<% if @delivery_address.building.present? %>
+<%= @delivery_address.building %>,
+<% end %>
+<%= @delivery_address.street %>,
+<%= @delivery_address.barangay %>,
+<%= @delivery_address.city %>,
+<%= @delivery_address.province %>
+<% if @delivery_address.landmark.present? %>
+Landmark: <%= @delivery_address.landmark %>
+<% end %>
+
+<% end %>
+ORDER DETAILS
+-------------
+Order Type: <%= @order.order_type %>
+<% if @order.shipping_method.present? %>
+Shipping Method: <%= @order.shipping_method %>
+<% end %>
+Payment Method: <%= @order.payment_method %>
+Payment Status: <%= @order.payment_status %>
+
+ORDER ITEMS
+-----------
+<% @order_items.each do |item| %>
+<%= item.product.name %>
+Quantity: <%= item.quantity %> x ₱<%= sprintf('%.2f', item.price_at_purchase) %> = ₱<%= sprintf('%.2f', item.quantity * item.price_at_purchase) %>
+
+<% end %>
+
+ORDER SUMMARY
+-------------
+Subtotal: ₱<%= sprintf('%.2f', @order.subtotal) %>
+<% if @order.shipping_fee && @order.shipping_fee > 0 %>
+Shipping Fee: ₱<%= sprintf('%.2f', @order.shipping_fee) %>
+<% end %>
+Convenience Fee: ₱<%= sprintf('%.2f', @order.convenience_fee) %>
+<% if @order.voucher_discount && @order.voucher_discount > 0 %>
+Discount: -₱<%= sprintf('%.2f', @order.voucher_discount) %>
+<% end %>
+Grand Total: ₱<%= sprintf('%.2f', @order.grand_total) %>
+
+---
+This is an automated email. Please do not reply to this message.
+If you have any questions about your order, please contact the merchant.
+
+© <%= Time.now.year %> POS System. All rights reserved.

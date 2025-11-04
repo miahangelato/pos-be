@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="csrf-token" content="<%= form_authenticity_token %>">
+  <title>GCash Payment Proof - <%= @order.reference_number %></title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+  </style>
+</head>
+<body>
+  <div class="container mx-auto px-4 py-8">
+    <div class="max-w-md mx-auto bg-white rounded-lg shadow-xl overflow-hidden">
+      <!-- Header -->
+      <div class="bg-gradient-to-r from-purple-600 to-pink-600 text-white p-6">
+        <h1 class="text-2xl font-bold mb-2">GCash Payment Proof</h1>
+        <p class="text-purple-100">Order #<%= @order.reference_number %></p>
+      </div>
+
+      <!-- Body -->
+      <div class="p-6">
+        <!-- Order Details Summary -->
+        <div class="bg-gray-50 rounded-lg p-4 mb-6">
+          <h3 class="font-semibold text-gray-900 mb-3">Order Summary</h3>
+          <div class="space-y-2 text-sm">
+            <div class="flex justify-between">
+              <span class="text-gray-600">Order Amount:</span>
+              <span class="font-semibold">₱<%= number_with_precision(@order.grand_total, precision: 2) %></span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-gray-600">Payment Status:</span>
+              <span class="font-semibold text-yellow-600">PAYMENT PENDING</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-gray-600">Customer:</span>
+              <span class="font-semibold"><%= @order.customer.full_name %></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Instructions -->
+        <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6">
+          <p class="text-sm text-blue-900">
+            <strong>Important:</strong> Please take a screenshot of your GCash transaction confirmation and upload it below. Make sure the transaction reference number is visible.
+          </p>
+        </div>
+
+        <!-- Form -->
+        <form id="paymentProofForm" class="space-y-4">
+          <!-- File Upload -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              📸 Upload Payment Proof (Required)
+            </label>
+            <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-purple-400 transition">
+              <input 
+                type="file" 
+                id="fileInput" 
+                name="file" 
+                accept="image/*" 
+                required
+                class="hidden"
+                onchange="updateFileName(this)"
+              >
+              <label for="fileInput" class="cursor-pointer">
+                <div class="text-gray-600">
+                  <div class="text-3xl mb-2">📁</div>
+                  <p class="font-medium">Click to upload</p>
+                  <p class="text-xs text-gray-500">PNG, JPG, or GIF (Max 5MB)</p>
+                </div>
+              </label>
+              <p id="fileName" class="text-sm text-green-600 mt-2 hidden"></p>
+            </div>
+          </div>
+
+          <!-- Remarks -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              📝 Additional Remarks (Optional)
+            </label>
+            <textarea 
+              id="remarks"
+              name="remarks"
+              rows="3"
+              placeholder="E.g., Transaction completed at 2:30 PM, Reference: ABC123..."
+              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+            ></textarea>
+          </div>
+
+          <!-- Submit Button -->
+          <button 
+            type="submit"
+            class="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white font-semibold py-3 rounded-lg hover:shadow-lg transition transform hover:-translate-y-0.5"
+          >
+            ✅ Submit Payment Proof
+          </button>
+
+          <!-- Success Message -->
+          <div id="successMessage" class="hidden bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg">
+            ✓ Payment proof submitted successfully! The merchant will verify within 24 hours.<br>
+            <small class="text-green-600">This window will close automatically in 3 seconds...</small>
+          </div>
+
+          <!-- Error Message -->
+          <div id="errorMessage" class="hidden bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg"></div>
+        </form>
+
+        <!-- Status Info -->
+        <div class="mt-6 pt-6 border-t border-gray-200">
+          <p class="text-xs text-gray-600 text-center">
+            <strong>Next Steps:</strong> After submission, the merchant will review and verify your payment proof. Your order status will update once verified.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function updateFileName(input) {
+      const fileName = document.getElementById('fileName');
+      if (input.files && input.files[0]) {
+        fileName.textContent = '✓ ' + input.files[0].name;
+        fileName.classList.remove('hidden');
+      }
+    }
+
+    document.getElementById('paymentProofForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const fileInput = document.getElementById('fileInput');
+      const remarks = document.getElementById('remarks').value;
+      const successMessage = document.getElementById('successMessage');
+      const errorMessage = document.getElementById('errorMessage');
+      
+      if (!fileInput.files[0]) {
+        errorMessage.textContent = 'Please select a file to upload';
+        errorMessage.classList.remove('hidden');
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append('file', fileInput.files[0]);
+      formData.append('remarks', remarks);
+      formData.append('order_id', '<%= @order.id %>');
+
+      try {
+        const response = await fetch('/payment_proofs', {
+          method: 'POST',
+          body: formData,
+          headers: {
+            'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]')?.content
+          }
+        });
+
+        if (response.ok) {
+          successMessage.classList.remove('hidden');
+          errorMessage.classList.add('hidden');
+          document.getElementById('paymentProofForm').style.display = 'none';
+          
+          // Close window/tab after 3 seconds
+          setTimeout(() => {
+            window.close();
+          }, 3000);
+        } else {
+          const error = await response.json();
+          errorMessage.textContent = error.error || 'Failed to submit payment proof';
+          errorMessage.classList.remove('hidden');
+          successMessage.classList.add('hidden');
+        }
+      } catch (err) {
+        errorMessage.textContent = 'Error submitting form: ' + err.message;
+        errorMessage.classList.remove('hidden');
+        successMessage.classList.add('hidden');
+      }
+    });
+  </script>
+</body>
+</html>

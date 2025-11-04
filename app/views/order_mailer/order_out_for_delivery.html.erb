@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta content='text/html; charset=UTF-8' http-equiv='Content-Type' />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      line-height: 1.6;
+      color: #333;
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .header {
+      background-color: #3b82f6;
+      color: white;
+      padding: 20px;
+      text-align: center;
+      border-radius: 8px 8px 0 0;
+    }
+    .content {
+      background-color: #f9fafb;
+      padding: 30px;
+      border: 1px solid #e5e7eb;
+    }
+    .section {
+      background-color: white;
+      padding: 20px;
+      margin-bottom: 20px;
+      border-radius: 8px;
+      border: 1px solid #e5e7eb;
+    }
+    .status-badge {
+      display: inline-block;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 16px;
+      font-weight: 600;
+      background-color: #bfdbfe;
+      color: #1e40af;
+    }
+    .footer {
+      text-align: center;
+      padding: 20px;
+      color: #6b7280;
+      font-size: 14px;
+    }
+    .tracking-box {
+      background-color: #eff6ff;
+      border-left: 4px solid #3b82f6;
+      padding: 15px;
+      margin-bottom: 20px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 20px;
+    }
+    th {
+      background-color: #f3f4f6;
+      padding: 12px;
+      text-align: left;
+      font-weight: 600;
+      border-bottom: 2px solid #e5e7eb;
+    }
+    td {
+      padding: 12px;
+      border-bottom: 1px solid #e5e7eb;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>📦 Your Order is Out for Delivery!</h1>
+  </div>
+
+  <div class="content">
+    <!-- Status Badge -->
+    <div style="text-align: center; margin-bottom: 30px;">
+      <span class="status-badge">OUT FOR DELIVERY</span>
+    </div>
+
+    <!-- Main Message -->
+    <div class="section">
+      <h2>Hello <%= @order.customer.full_name %>,</h2>
+      <p>Great news! Your order <strong>#<%= @order.reference_number %></strong> is now out for delivery.</p>
+      <p>Our delivery partner is on their way to your address. Your order is expected to arrive soon!</p>
+    </div>
+
+    <!-- Tracking Information -->
+    <div class="tracking-box">
+      <strong>📍 Delivery Status:</strong> In Transit
+      <br/>
+      <strong>Expected Delivery:</strong> Within 24 hours
+      <br/>
+      <strong>Please ensure someone is available to receive the package.</strong>
+    </div>
+
+    <!-- Delivery Address -->
+    <div class="section">
+      <h3>📍 Delivery Address</h3>
+      <p><%= @order.delivery_address&.full_address || 'N/A' %></p>
+    </div>
+
+    <!-- Order Summary -->
+    <div class="section">
+      <h3>Order Summary</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Product</th>
+            <th>Quantity</th>
+            <th>Unit Price</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @order.order_items.each do |item| %>
+            <tr>
+              <td><%= item.product.name %></td>
+              <td><%= item.quantity %></td>
+              <td>₱<%= number_with_precision(item.price_at_purchase, precision: 2) %></td>
+              <td>₱<%= number_with_precision(item.line_total, precision: 2) %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+
+      <div style="background-color: #f3f4f6; padding: 15px; border-radius: 8px;">
+        <table style="margin-bottom: 0;">
+          <tr>
+            <td>Subtotal:</td>
+            <td style="text-align: right;"><strong>₱<%= number_with_precision(@order.subtotal, precision: 2) %></strong></td>
+          </tr>
+          <% if @order.shipping_fee.to_f > 0 %>
+            <tr>
+              <td>Shipping Fee:</td>
+              <td style="text-align: right;"><strong>₱<%= number_with_precision(@order.shipping_fee, precision: 2) %></strong></td>
+            </tr>
+          <% end %>
+          <% if @order.convenience_fee.to_f > 0 %>
+            <tr>
+              <td>Convenience Fee:</td>
+              <td style="text-align: right;"><strong>₱<%= number_with_precision(@order.convenience_fee, precision: 2) %></strong></td>
+            </tr>
+          <% end %>
+          <% if @order.discount_amount.to_f > 0 %>
+            <tr>
+              <td>Discount:</td>
+              <td style="text-align: right;"><strong style="color: #10b981;">-₱<%= number_with_precision(@order.discount_amount, precision: 2) %></strong></td>
+            </tr>
+          <% end %>
+          <tr style="border-top: 2px solid #e5e7eb;">
+            <td><strong>Grand Total:</strong></td>
+            <td style="text-align: right;"><strong style="font-size: 18px; color: #3b82f6;">₱<%= number_with_precision(@order.grand_total, precision: 2) %></strong></td>
+          </tr>
+        </table>
+      </div>
+    </div>
+
+    <!-- Instructions -->
+    <div class="section" style="background-color: #fef3c7;">
+      <h3 style="color: #92400e;">⚠️ Important Instructions</h3>
+      <ul style="margin: 10px 0; padding-left: 20px;">
+        <li>Please be available to receive the package during delivery hours</li>
+        <li>Have a valid ID ready for verification if required</li>
+        <li>Contact the delivery partner immediately if you're not available</li>
+        <li>Inspect the package for any visible damage before signing</li>
+      </ul>
+    </div>
+
+    <!-- Questions -->
+    <div class="section">
+      <h3>Need Help?</h3>
+      <p>If you have any questions about your delivery or order, please don't hesitate to contact us.</p>
+      <p><strong>Email:</strong> support@posystem.com</p>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      <p>Thank you for your business! We appreciate your order.</p>
+      <p style="margin-top: 10px; font-size: 12px; color: #9ca3af;">
+        This is an automated email. Please do not reply directly. Contact support if you have questions.
+      </p>
+    </div>
+  </div>
+</body>
+</html>

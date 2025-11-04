@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta content='text/html; charset=UTF-8' http-equiv='Content-Type' />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      line-height: 1.6;
+      color: #333;
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .header {
+      background-color: #2563eb;
+      color: white;
+      padding: 20px;
+      text-align: center;
+      border-radius: 8px 8px 0 0;
+    }
+    .content {
+      background-color: #f9fafb;
+      padding: 30px;
+      border: 1px solid #e5e7eb;
+    }
+    .section {
+      background-color: white;
+      padding: 20px;
+      margin-bottom: 20px;
+      border-radius: 8px;
+      border: 1px solid #e5e7eb;
+    }
+    .section-title {
+      font-size: 18px;
+      font-weight: bold;
+      color: #1f2937;
+      margin-bottom: 15px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #2563eb;
+    }
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid #f3f4f6;
+    }
+    .info-label {
+      font-weight: 600;
+      color: #6b7280;
+    }
+    .info-value {
+      color: #1f2937;
+      text-align: right;
+    }
+    .order-item {
+      padding: 15px;
+      background-color: #f9fafb;
+      margin-bottom: 10px;
+      border-radius: 6px;
+      border: 1px solid #e5e7eb;
+    }
+    .item-name {
+      font-weight: 600;
+      color: #1f2937;
+      margin-bottom: 5px;
+    }
+    .item-details {
+      display: flex;
+      justify-content: space-between;
+      font-size: 14px;
+      color: #6b7280;
+    }
+    .total-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 12px 0;
+      font-size: 16px;
+    }
+    .grand-total {
+      font-size: 20px;
+      font-weight: bold;
+      color: #2563eb;
+      padding-top: 15px;
+      border-top: 2px solid #2563eb;
+    }
+    .status-badge {
+      display: inline-block;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: 600;
+      background-color: #fef3c7;
+      color: #92400e;
+    }
+    .footer {
+      text-align: center;
+      padding: 20px;
+      color: #6b7280;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>Order Placed Successfully</h1>
+    <p>Thank you for your order!</p>
+  </div>
+
+  <div class="content">
+    <!-- Order Reference -->
+    <div class="section">
+      <div class="section-title">Order Reference Number</div>
+      <div style="font-size: 24px; font-weight: bold; color: #2563eb; text-align: center;">
+        <%= @order.reference_number %>
+      </div>
+      <div style="text-align: center; margin-top: 10px;">
+        <span class="status-badge"><%= @order.status %></span>
+      </div>
+    </div>
+
+    <!-- Customer Information -->
+    <div class="section">
+      <div class="section-title">Customer Information</div>
+      <div class="info-row">
+        <span class="info-label">Full Name:</span>
+        <span class="info-value"><%= @customer.full_name %></span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Email Address:</span>
+        <span class="info-value"><%= @customer.email %></span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Mobile Number:</span>
+        <span class="info-value"><%= @customer.mobile_number %></span>
+      </div>
+    </div>
+
+    <% if @delivery_address && @order.order_type == 'ONLINE' %>
+    <!-- Delivery Address -->
+    <div class="section">
+      <div class="section-title">Delivery Address</div>
+      <div class="info-value" style="text-align: left; line-height: 1.8;">
+        <% if @delivery_address.room_unit.present? %>
+          <%= @delivery_address.room_unit %>,
+        <% end %>
+        <% if @delivery_address.building.present? %>
+          <%= @delivery_address.building %>,<br/>
+        <% end %>
+        <%= @delivery_address.street %>,<br/>
+        <%= @delivery_address.barangay %>,<br/>
+        <%= @delivery_address.city %>,<br/>
+        <%= @delivery_address.province %>
+        <% if @delivery_address.landmark.present? %>
+          <br/><em>Landmark: <%= @delivery_address.landmark %></em>
+        <% end %>
+      </div>
+    </div>
+    <% end %>
+
+    <!-- Order Details -->
+    <div class="section">
+      <div class="section-title">Order Details</div>
+      <div class="info-row">
+        <span class="info-label">Order Type:</span>
+        <span class="info-value"><%= @order.order_type %></span>
+      </div>
+      <% if @order.shipping_method.present? %>
+      <div class="info-row">
+        <span class="info-label">Shipping Method:</span>
+        <span class="info-value"><%= @order.shipping_method %></span>
+      </div>
+      <% end %>
+      <div class="info-row">
+        <span class="info-label">Payment Method:</span>
+        <span class="info-value"><%= @order.payment_method %></span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Payment Status:</span>
+        <span class="info-value"><%= @order.payment_status %></span>
+      </div>
+    </div>
+
+    <!-- Order Items -->
+    <div class="section">
+      <div class="section-title">Order Items</div>
+      <% @order_items.each do |item| %>
+        <div class="order-item">
+          <div class="item-name"><%= item.product.name %></div>
+          <div class="item-details">
+            <span>Quantity: <%= item.quantity %></span>
+            <span>₱<%= sprintf('%.2f', item.price_at_purchase) %> each</span>
+            <span><strong>₱<%= sprintf('%.2f', item.quantity * item.price_at_purchase) %></strong></span>
+          </div>
+        </div>
+      <% end %>
+    </div>
+
+    <!-- Order Summary -->
+    <div class="section">
+      <div class="section-title">Order Summary</div>
+      <div class="total-row">
+        <span>Subtotal:</span>
+        <span>₱<%= sprintf('%.2f', @order.subtotal) %></span>
+      </div>
+      <% if @order.shipping_fee && @order.shipping_fee > 0 %>
+      <div class="total-row">
+        <span>Shipping Fee:</span>
+        <span>₱<%= sprintf('%.2f', @order.shipping_fee) %></span>
+      </div>
+      <% end %>
+      <div class="total-row">
+        <span>Convenience Fee:</span>
+        <span>₱<%= sprintf('%.2f', @order.convenience_fee) %></span>
+      </div>
+      <% if @order.voucher_discount && @order.voucher_discount > 0 %>
+      <div class="total-row" style="color: #dc2626;">
+        <span>Discount:</span>
+        <span>-₱<%= sprintf('%.2f', @order.voucher_discount) %></span>
+      </div>
+      <% end %>
+      <div class="total-row grand-total">
+        <span>Grand Total:</span>
+        <span>₱<%= sprintf('%.2f', @order.grand_total) %></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <p>This is an automated email. Please do not reply to this message.</p>
+    <p>If you have any questions about your order, please contact the merchant.</p>
+    <p>&copy; <%= Time.now.year %> POS System. All rights reserved.</p>
+  </div>
+</body>
+</html>
