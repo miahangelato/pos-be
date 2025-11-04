@@ -3,7 +3,7 @@ class PaymentMethod < ApplicationRecord
   belongs_to :merchant
 
   # Enums
-  enum payment_type: { cash: 'CASH', online: 'ONLINE', check: 'CHECK', bank_transfer: 'BANK_TRANSFER' }
+  enum :payment_type, { cash: 'CASH', online: 'ONLINE', check: 'CHECK', bank_transfer: 'BANK_TRANSFER' }
 
   # Validations
   validates :name, presence: true, uniqueness: { scope: :merchant_id }

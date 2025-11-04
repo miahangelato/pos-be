@@ -3,7 +3,7 @@ class ShippingMethod < ApplicationRecord
   belongs_to :merchant
 
   # Enums
-  enum calculation_type: { flat: 'FLAT', weight_based: 'WEIGHT_BASED', distance_based: 'DISTANCE_BASED' }
+  enum :calculation_type, { flat: 'FLAT', weight_based: 'WEIGHT_BASED', distance_based: 'DISTANCE_BASED' }
 
   # Validations
   validates :name, presence: true, uniqueness: { scope: :merchant_id }
