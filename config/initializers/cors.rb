@@ -7,7 +7,16 @@
 
 Rails.application.config.middleware.insert_before 0, Rack::Cors do
   allow do
-    origins "localhost:3000", "localhost:5173", "localhost:5174", "127.0.0.1"
+    # Development origins
+    development_origins = ["localhost:3000", "localhost:5173", "localhost:5174", "127.0.0.1"]
+    
+    # Production origins from environment variable
+    production_origins = ENV['ALLOWED_ORIGINS']&.split(',') || []
+    
+    # Combine origins based on environment
+    allowed_origins = Rails.env.production? ? production_origins : development_origins
+    
+    origins(*allowed_origins)
 
     resource "*",
       headers: :any,
