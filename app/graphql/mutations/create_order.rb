@@ -193,6 +193,15 @@ module Mutations
             # Reload order to ensure we return fresh data (including updated customer)
             order.reload
             
+            # Send order confirmation email after transaction is complete
+            begin
+              OrderMailer.order_placed(order).deliver_now
+              Rails.logger.info "Order confirmation email sent to #{order.customer.email}"
+            rescue => e
+              Rails.logger.error "Failed to send order confirmation email: #{e.message}"
+              Rails.logger.error e.backtrace.join("\n")
+            end
+            
             { order: order, errors: [] }
           else
             { order: nil, errors: order.errors.full_messages }
