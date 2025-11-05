@@ -33,11 +33,14 @@ module Mutations
       end
 
       begin
+        # Convert GraphQL input objects to hashes if they exist
+        customer_attrs_hash = customer_attributes&.to_h
+        delivery_address_attrs_hash = delivery_address_attributes&.to_h
+        order_items_hash = order_items.map(&:to_h)
+        
+        result = nil
+        
         ActiveRecord::Base.transaction do
-          # Convert GraphQL input objects to hashes if they exist
-          customer_attrs_hash = customer_attributes&.to_h
-          delivery_address_attrs_hash = delivery_address_attributes&.to_h
-          order_items_hash = order_items.map(&:to_h)
           
           # Determine merchant and customer based on who's creating the order
           if current_user.customer?
