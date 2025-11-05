@@ -58,19 +58,32 @@ module Mutations
             case status
             when 'CONFIRMED'
               OrderMailer.order_confirmed(order).deliver_now
-              Rails.logger.info "Order confirmed email sent for order #{order.reference_number}"
+              Rails.logger.info "✅ Order confirmed email sent for order #{order.reference_number} to #{order.customer.email}"
             when 'OUT_FOR_DELIVERY'
               OrderMailer.order_out_for_delivery(order).deliver_now
-              Rails.logger.info "Order out for delivery email sent for order #{order.reference_number}"
+              Rails.logger.info "✅ Order out for delivery email sent for order #{order.reference_number} to #{order.customer.email}"
             when 'COMPLETED'
               OrderMailer.order_completed(order).deliver_now
-              Rails.logger.info "Order completed email sent for order #{order.reference_number}"
+              Rails.logger.info "✅ Order completed email sent for order #{order.reference_number} to #{order.customer.email}"
             when 'CANCELLED'
               OrderMailer.order_cancelled(order).deliver_now
-              Rails.logger.info "Order cancelled email sent for order #{order.reference_number}"
+              Rails.logger.info "✅ Order cancelled email sent for order #{order.reference_number} to #{order.customer.email}"
+            end
+          rescue Net::OpenTimeout, Net::ReadTimeout, Errno::ETIMEDOUT => e
+            Rails.logger.warn "⚠️  SMTP timeout for order status email, queuing for background: #{e.message}"
+            # Fallback to background delivery for timeouts
+            case status
+            when 'CONFIRMED'
+              OrderMailer.order_confirmed(order).deliver_later
+            when 'OUT_FOR_DELIVERY'
+              OrderMailer.order_out_for_delivery(order).deliver_later
+            when 'COMPLETED'
+              OrderMailer.order_completed(order).deliver_later
+            when 'CANCELLED'
+              OrderMailer.order_cancelled(order).deliver_later
             end
           rescue => e
-            Rails.logger.error "Failed to send order status email: #{e.message}"
+            Rails.logger.error "❌ Failed to send order status email: #{e.class}: #{e.message}"
             Rails.logger.error e.backtrace.join("\n")
             # Don't fail the status update if email fails
           end

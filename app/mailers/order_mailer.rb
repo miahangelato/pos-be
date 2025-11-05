@@ -2,23 +2,26 @@ class OrderMailer < ApplicationMailer
   default from: 'to.miahangela@gmail.com'
 
   # Send email when order is placed
-  def order_placed(order)
+  def order_placed(order, email_override: nil)
     @order = order
     @customer = order.customer
     @merchant = order.merchant
     @order_items = order.order_items.includes(:product)
     @delivery_address = order.delivery_address
 
+    # Use override email if provided, otherwise use customer's stored email
+    recipient_email = email_override || @customer.email
+
     # Use GCash-specific template for GCASH orders
     if order.gcash?
       mail(
-        to: @customer.email,
+        to: recipient_email,
         subject: "GCash Payment Required - #{@order.reference_number}",
         template_name: 'order_placed_gcash'
       )
     else
       mail(
-        to: @customer.email,
+        to: recipient_email,
         subject: "Order Placed Successfully - #{@order.reference_number}",
         template_name: 'order_placed'
       )

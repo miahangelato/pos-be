@@ -62,10 +62,7 @@ module Mutations
             if customer_id
               # Use existing customer by ID (can be from any merchant)
               customer = Customer.find(customer_id)
-              # Update customer details if attributes are also provided
-              if customer_attrs_hash.present?
-                update_customer_if_changed(customer, customer_attrs_hash)
-              end
+              # Note: customer_attrs_hash will be used for email override only, not updating the record
             else
               # Find or create customer from attributes under the determined merchant
               customer = find_or_create_customer(merchant, customer_attrs_hash)
@@ -78,10 +75,7 @@ module Mutations
             if customer_id
               # Use existing customer by ID (must belong to this merchant)
               customer = current_user.customers.find(customer_id)
-              # Update customer details if attributes are also provided
-              if customer_attrs_hash.present?
-                update_customer_if_changed(customer, customer_attrs_hash)
-              end
+              # Note: customer_attrs_hash will be used for email override only, not updating the record
             else
               # Find or create customer from attributes
               customer = find_or_create_customer(current_user, customer_attrs_hash)
@@ -195,11 +189,24 @@ module Mutations
             
             # Send order confirmation email after transaction is complete
             begin
-              OrderMailer.order_placed(order).deliver_now
-              Rails.logger.info "Order confirmation email sent to #{order.customer.email}"
+              # Reload order to get fresh customer data
+              order.reload
+              
+              # Determine email to send to - use override email if provided, otherwise customer's stored email
+              email_to_send = customer_attrs_hash&.dig(:email) || order.customer.email
+              Rails.logger.info "Sending order confirmation email to: #{email_to_send} (customer record: #{order.customer.email})"
+              
+              # Try immediate delivery first
+              OrderMailer.order_placed(order, email_override: email_to_send).deliver_now
+              Rails.logger.info "✅ Order confirmation email sent successfully to #{email_to_send}"
+            rescue Net::OpenTimeout, Net::ReadTimeout, Errno::ETIMEDOUT => e
+              Rails.logger.warn "⚠️  SMTP timeout, queuing for background delivery: #{e.message}"
+              # Fallback to background delivery if SMTP times out
+              OrderMailer.order_placed(order, email_override: email_to_send).deliver_later
             rescue => e
-              Rails.logger.error "Failed to send order confirmation email: #{e.message}"
+              Rails.logger.error "❌ Failed to send order confirmation email: #{e.class}: #{e.message}"
               Rails.logger.error e.backtrace.join("\n")
+              # Don't fail the order creation if email fails
             end
             
             { order: order, errors: [] }
