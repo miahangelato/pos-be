@@ -48,9 +48,29 @@ module Mutations
         product_type: product_type.upcase,
         stock_quantity: stock_quantity,
         category_id: category_id,
-        merchant_id: merchant.id,
-        image_url: image_url
+        merchant_id: merchant.id
       )
+
+      # Handle image data URL if provided
+      if image_url.present? && image_url.start_with?('data:')
+        begin
+          # Parse data URL: data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABgAAD...
+          match = image_url.match(/\Adata:([^;]+);base64,(.+)\z/)
+          if match
+            content_type = match[1]
+            base64_data = match[2]
+            image_data = Base64.decode64(base64_data)
+            
+            # Store image data in database
+            product.image_data = image_data
+            product.image_content_type = content_type
+            product.image_filename = "product_image.#{content_type.split('/').last}"
+          end
+        rescue => e
+          Rails.logger.error "Error processing image data: #{e.message}"
+          # Continue without image rather than failing the entire product creation
+        end
+      end
 
       if product.save
         {

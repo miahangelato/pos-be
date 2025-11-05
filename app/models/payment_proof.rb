@@ -17,7 +17,8 @@ class PaymentProof < ApplicationRecord
   def image_url
     if image_data.present?
       # Database storage - return data URL for production
-      "data:#{image_content_type};base64,#{Base64.encode64(image_data)}"
+      # Use strict_encode64 to avoid newlines in the base64 string
+      "data:#{image_content_type};base64,#{Base64.strict_encode64(image_data)}"
     elsif image.attached?
       # Active Storage - for development
       Rails.application.routes.url_helpers.rails_blob_path(image, only_path: true)
