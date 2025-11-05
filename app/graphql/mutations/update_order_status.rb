@@ -56,18 +56,22 @@ module Mutations
           # Send email notification based on new status
           begin
             case status
+            when 'CONFIRMED'
+              OrderMailer.order_confirmed(order).deliver_now
+              Rails.logger.info "Order confirmed email sent for order #{order.reference_number}"
             when 'OUT_FOR_DELIVERY'
-              OrderMailer.order_out_for_delivery(order).deliver_later
-              Rails.logger.info "Order out for delivery email queued for order #{order.reference_number}"
+              OrderMailer.order_out_for_delivery(order).deliver_now
+              Rails.logger.info "Order out for delivery email sent for order #{order.reference_number}"
             when 'COMPLETED'
-              OrderMailer.order_completed(order).deliver_later
-              Rails.logger.info "Order completed email queued for order #{order.reference_number}"
+              OrderMailer.order_completed(order).deliver_now
+              Rails.logger.info "Order completed email sent for order #{order.reference_number}"
             when 'CANCELLED'
-              OrderMailer.order_cancelled(order).deliver_later
-              Rails.logger.info "Order cancelled email queued for order #{order.reference_number}"
+              OrderMailer.order_cancelled(order).deliver_now
+              Rails.logger.info "Order cancelled email sent for order #{order.reference_number}"
             end
           rescue => e
             Rails.logger.error "Failed to send order status email: #{e.message}"
+            Rails.logger.error e.backtrace.join("\n")
             # Don't fail the status update if email fails
           end
           
