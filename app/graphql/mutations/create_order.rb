@@ -187,33 +187,18 @@ module Mutations
             # Reload order to ensure we return fresh data (including updated customer)
             order.reload
             
-            # Send order confirmation email after transaction is complete
-            begin
-              # Reload order to get fresh customer data
-              order.reload
-              
-              # Determine email to send to - use override email if provided, otherwise customer's stored email
-              email_to_send = customer_attrs_hash&.dig(:email) || order.customer.email
-              Rails.logger.info "Sending order confirmation email to: #{email_to_send} (customer record: #{order.customer.email})"
-              
-              # Try immediate delivery first
-              OrderMailer.order_placed(order, email_override: email_to_send).deliver_now
-              Rails.logger.info "✅ Order confirmation email sent successfully to #{email_to_send}"
-            rescue Net::OpenTimeout, Net::ReadTimeout, Errno::ETIMEDOUT => e
-              Rails.logger.warn "⚠️  SMTP timeout, queuing for background delivery: #{e.message}"
-              # Fallback to background delivery if SMTP times out
-              OrderMailer.order_placed(order, email_override: email_to_send).deliver_later
-            rescue => e
-              Rails.logger.error "❌ Failed to send order confirmation email: #{e.class}: #{e.message}"
-              Rails.logger.error e.backtrace.join("\n")
-              # Don't fail the order creation if email fails
-            end
-            
-            { order: order, errors: [] }
+            result = { order: order, errors: [] }
           else
-            { order: nil, errors: order.errors.full_messages }
+            result = { order: nil, errors: order.errors.full_messages }
           end
         end
+        
+        # Send email only if order was created successfully and transaction is committed
+        if result[:order] && result[:errors].empty?
+          send_order_confirmation_email(result[:order], customer_attrs_hash)
+        end
+        
+        result
       rescue ActiveRecord::RecordNotFound => e
         Rails.logger.error "RecordNotFound in CreateOrder: #{e.message}"
         Rails.logger.error e.backtrace.join("\n")
@@ -323,6 +308,25 @@ module Mutations
 
     def calculate_convenience_fee(order)
       10.0 # Default convenience fee
+    end
+
+    def send_order_confirmation_email(order, customer_attrs_hash)
+      # Determine email to send to - use override email if provided, otherwise customer's stored email
+      email_to_send = customer_attrs_hash&.dig(:email) || order.customer.email
+      Rails.logger.info "Sending order confirmation email to: #{email_to_send} (customer record: #{order.customer.email})"
+      
+      begin
+        # Try immediate delivery first
+        OrderMailer.order_placed(order, email_override: email_to_send).deliver_now
+        Rails.logger.info "✅ Order confirmation email sent successfully to #{email_to_send}"
+      rescue Net::OpenTimeout, Net::ReadTimeout, Errno::ETIMEDOUT => e
+        Rails.logger.warn "⚠️  SMTP timeout for order #{order.id}, skipping background job to avoid timing issues"
+        Rails.logger.warn "Email can be sent manually or attempted later when order is confirmed"
+      rescue => e
+        Rails.logger.error "❌ Failed to send order confirmation email: #{e.class}: #{e.message}"
+        Rails.logger.error e.backtrace.join("\n")
+        # Don't fail the order creation if email fails
+      end
     end
   end
 end
