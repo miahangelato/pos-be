@@ -9,6 +9,10 @@ BACKEND_URL=https://pos-be-0zb1.onrender.com
 FRONTEND_URL=https://pos-fe-jfuq.vercel.app
 ALLOWED_ORIGINS=https://pos-fe-jfuq.vercel.app
 
+# Email Configuration (Required for order notifications)
+SMTP_USERNAME=to.miahangela@gmail.com
+SMTP_PASSWORD=your-gmail-app-password-here
+
 # DATABASE_URL will be automatically set by Render when you connect PostgreSQL service
 
 # Build Command: bundle install

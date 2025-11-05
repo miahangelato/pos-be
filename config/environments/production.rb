@@ -52,23 +52,26 @@ Rails.application.configure do
   # config.solid_queue.connects_to = { database: { writing: :queue } }
   config.active_job.queue_adapter = :async
 
-  # Ignore bad email addresses and do not raise email delivery errors.
-  # Set this to true and configure the email server for immediate delivery to raise delivery errors.
-  # config.action_mailer.raise_delivery_errors = false
+  # Enable email delivery in production
+  config.action_mailer.delivery_method = :smtp
+  config.action_mailer.perform_deliveries = true
+  config.action_mailer.raise_delivery_errors = true
 
   # Set host to be used by links generated in mailer templates and Active Storage URLs.
   backend_host = ENV['BACKEND_URL']&.gsub(/https?:\/\//, '') || "pos-be-0zb1.onrender.com"
   config.action_mailer.default_url_options = { host: backend_host }
   Rails.application.routes.default_url_options = { host: backend_host, protocol: 'https' }
 
-  # Specify outgoing SMTP server. Remember to add smtp/* credentials via bin/rails credentials:edit.
-  # config.action_mailer.smtp_settings = {
-  #   user_name: Rails.application.credentials.dig(:smtp, :user_name),
-  #   password: Rails.application.credentials.dig(:smtp, :password),
-  #   address: "smtp.example.com",
-  #   port: 587,
-  #   authentication: :plain
-  # }
+  # Use Gmail SMTP for production email delivery
+  config.action_mailer.smtp_settings = {
+    address: 'smtp.gmail.com',
+    port: 587,
+    domain: 'gmail.com',
+    user_name: ENV['SMTP_USERNAME'] || 'to.miahangela@gmail.com',
+    password: ENV['SMTP_PASSWORD'],
+    authentication: 'plain',
+    enable_starttls_auto: true
+  }
 
   # Enable locale fallbacks for I18n (makes lookups for any locale fall back to
   # the I18n.default_locale when a translation cannot be found).
