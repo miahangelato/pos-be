@@ -13,17 +13,7 @@ module Types
 
     # Custom field to get image URL (same pattern as ProductType)
     def image_url
-      # Return Active Storage attachment URL if image is attached
-      if object.image.attached?
-        # Generate a properly signed URL with expiration timestamp
-        # This is required for Active Storage to serve the file
-        blob = object.image.blob
-        signed_id = blob.signed_id(expires_in: 1.day)
-        filename = blob.filename
-        # Return absolute URL pointing to backend server
-        base_url = Rails.env.production? ? ENV['BACKEND_URL'] || 'https://your-api-domain.com' : 'http://localhost:3000'
-        "#{base_url}/rails/active_storage/blobs/redirect/#{signed_id}/#{filename}"
-      end
+      object.image_url
     end
   end
 end

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2025_11_04_220731) do
+ActiveRecord::Schema[8.1].define(version: 2025_11_05_000323) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -128,6 +128,9 @@ ActiveRecord::Schema[8.1].define(version: 2025_11_04_220731) do
   create_table "payment_proofs", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "file_key"
+    t.string "image_content_type"
+    t.binary "image_data"
+    t.string "image_filename"
     t.integer "merchant_id"
     t.bigint "order_id", null: false
     t.text "remarks"
@@ -142,6 +145,9 @@ ActiveRecord::Schema[8.1].define(version: 2025_11_04_220731) do
     t.bigint "category_id", null: false
     t.datetime "created_at", null: false
     t.text "description"
+    t.string "image_content_type"
+    t.binary "image_data"
+    t.string "image_filename"
     t.string "image_url"
     t.bigint "merchant_id", null: false
     t.string "name"

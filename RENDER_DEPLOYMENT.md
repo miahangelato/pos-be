@@ -41,12 +41,12 @@ SMTP_DOMAIN=gmail.com
 **Environment:** Ruby
 **Build Command:**
 ```bash
-bundle install && rails db:migrate && rails db:seed
+bundle install
 ```
 
 **Start Command:**
 ```bash
-rails server -e production -p $PORT
+rails db:migrate && rails db:seed && rails server -e production -p $PORT
 ```
 
 **Branch:** master (or your main branch)
