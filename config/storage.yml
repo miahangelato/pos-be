@@ -6,6 +6,15 @@ local:
   service: Disk
   root: <%= Rails.root.join("storage") %>
 
+render_disk:
+  service: Disk
+  root: <%= ENV['RENDER_DISK_PATH'] || '/opt/render/project/storage' %>
+
+# Database storage for simple deployments (stores files as blobs in PostgreSQL)
+database:
+  service: Disk
+  root: <%= Rails.root.join("tmp/storage") %>
+
 # Use bin/rails credentials:edit to set the AWS secrets (as aws:access_key_id|secret_access_key)
 # amazon:
 #   service: S3
