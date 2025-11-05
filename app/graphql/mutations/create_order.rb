@@ -190,15 +190,6 @@ module Mutations
               end
             end
 
-            # Send order confirmation email
-            begin
-              OrderMailer.order_placed(order).deliver_later
-              Rails.logger.info "Order confirmation email queued for order #{order.reference_number}"
-            rescue => e
-              Rails.logger.error "Failed to send order confirmation email: #{e.message}"
-              # Don't fail the order creation if email fails
-            end
-
             # Reload order to ensure we return fresh data (including updated customer)
             order.reload
             
