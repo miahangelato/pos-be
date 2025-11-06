@@ -17,6 +17,14 @@ module Mutations
     field :errors, [String], null: false
 
     def resolve(customer_id: nil, customer_attributes: nil, order_items:, order_type:, payment_method:, shipping_method: nil, delivery_address_attributes: nil, voucher_code: nil)
+      Rails.logger.info "=== CREATE ORDER DEBUG ==="
+      Rails.logger.info "Received parameters:"
+      Rails.logger.info "  customer_id: #{customer_id}"
+      Rails.logger.info "  order_type: #{order_type}"
+      Rails.logger.info "  payment_method: #{payment_method}"
+      Rails.logger.info "  shipping_method: #{shipping_method}"
+      Rails.logger.info "  order_items count: #{order_items&.length}"
+      
       # Ensure user is authenticated
       current_user = context[:current_user]
       return { order: nil, errors: ["Authentication required"] } unless current_user
@@ -90,6 +98,15 @@ module Mutations
           payment_status = payment_method == 'CASH' ? 'PAID' : 'PAYMENT_PENDING'
           
           # Create order
+          Rails.logger.info "Creating order with parameters:"
+          Rails.logger.info "  merchant: #{merchant&.id}"
+          Rails.logger.info "  customer: #{customer&.id}"
+          Rails.logger.info "  order_type: #{order_type}"
+          Rails.logger.info "  payment_method: #{payment_method}"
+          Rails.logger.info "  shipping_method: #{shipping_method}"
+          Rails.logger.info "  status: PENDING"
+          Rails.logger.info "  payment_status: #{payment_status}"
+          
           order = Order.new(
             merchant: merchant,
             customer: customer,
@@ -99,9 +116,17 @@ module Mutations
             status: 'PENDING',
             payment_status: payment_status
           )
+          
+          Rails.logger.info "Order created, proceeding to add order items..."
 
           # Create delivery address if provided
+          Rails.logger.info "Checking delivery address..."
+          Rails.logger.info "delivery_address_attrs_hash: #{delivery_address_attrs_hash}"
+          Rails.logger.info "order_type: #{order_type}"
+          
           if delivery_address_attrs_hash && order_type == 'ONLINE'
+            Rails.logger.info "Creating delivery address for ONLINE order..."
+            
             # Map frontend field names to database column names
             mapped_delivery_attrs = {
               province: delivery_address_attrs_hash[:province],
@@ -114,13 +139,17 @@ module Mutations
               remarks: delivery_address_attrs_hash[:remarks]
             }.compact
             
+            Rails.logger.info "Mapped delivery attributes: #{mapped_delivery_attrs}"
+            
             delivery_address = order.build_delivery_address(mapped_delivery_attrs)
-            return { order: nil, errors: delivery_address.errors.full_messages } unless delivery_address.valid?
+            Rails.logger.info "Delivery address built successfully"
           end
 
           # Add order items
           subtotal = 0
-          order_items_hash.each do |item_attrs|
+          Rails.logger.info "Processing #{order_items_hash.length} order items..."
+          order_items_hash.each_with_index do |item_attrs, index|
+            Rails.logger.info "Processing item #{index + 1}: #{item_attrs}"
             # Find product based on user role
             if current_user.customer?
               # Customer: can order from any merchant
@@ -138,8 +167,11 @@ module Mutations
               end
             else
               # Merchant: can only use their own products
+              Rails.logger.info "Finding product #{item_attrs[:product_id]} for merchant #{current_user.id}"
               product = current_user.products.find(item_attrs[:product_id])
             end
+            
+            Rails.logger.info "Found product: #{product&.id} - #{product&.name}"
             
             # Check stock for physical products
             if product.physical? && product.stock_quantity && product.stock_quantity < item_attrs[:quantity]
@@ -203,14 +235,17 @@ module Mutations
         
         result
       rescue ActiveRecord::RecordNotFound => e
+        Rails.logger.error "=== RECORD NOT FOUND ERROR ==="
         Rails.logger.error "RecordNotFound in CreateOrder: #{e.message}"
         Rails.logger.error e.backtrace.join("\n")
         { order: nil, errors: ["Product not found"] }
       rescue ActiveRecord::RecordInvalid => e
+        Rails.logger.error "=== RECORD INVALID ERROR ==="
         Rails.logger.error "RecordInvalid in CreateOrder: #{e.message}"
         Rails.logger.error e.backtrace.join("\n")
         { order: nil, errors: [e.message] }
       rescue => e
+        Rails.logger.error "=== GENERAL ERROR ==="
         Rails.logger.error "Error in CreateOrder: #{e.message}"
         Rails.logger.error e.backtrace.join("\n")
         { order: nil, errors: [e.message] }
